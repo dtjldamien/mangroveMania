@@ -61,10 +61,6 @@ namespace Gamekit3D
             SceneLinkedSMB<ChomperBehavior>.Initialise(m_Controller.animator, this);
         }
 
-        /// <summary>
-        /// Called by animation events.
-        /// </summary>
-        /// <param name="frontFoot">Has a value of 1 when it's a front foot stepping and 0 when it's a back foot.</param>
         void PlayStep(int frontFoot)
         {
             if (frontStepAudio != null && frontFoot == 1)
@@ -73,9 +69,6 @@ namespace Gamekit3D
                 backStepAudio.PlayRandomClip ();
         }
 
-        /// <summary>
-        /// Called by animation events.
-        /// </summary>
         public void Grunt ()
         {
             if (gruntAudio != null)
@@ -106,12 +99,10 @@ namespace Gamekit3D
 
         public void FindTarget()
         {
-            //we ignore height difference if the target was already seen
             PlayerController target = playerScanner.Detect(transform, m_Target == null);
 
             if (m_Target == null)
             {
-                //we just saw the player for the first time, pick an empty spot to target around them
                 if (target != null)
                 {
                     m_Controller.animator.SetTrigger(hashSpotted);
@@ -123,9 +114,7 @@ namespace Gamekit3D
             }
             else
             {
-                //we lost the target. But chomper have a special behaviour : they only loose the player scent if they move past their detection range
-                //and they didn't see the player for a given time. Not if they move out of their detectionAngle. So we check that this is the case before removing the target
-                if (target == null)
+                  if (target == null)
                 {
                     m_TimerSinceLostTarget += Time.deltaTime;
 
@@ -138,7 +127,7 @@ namespace Gamekit3D
                             if (m_FollowerInstance != null)
                                 m_FollowerInstance.distributor.UnregisterFollower(m_FollowerInstance);
 
-                            //the target move out of range, reset the target
+                        
                             m_Target = null;
                         }
                     }
@@ -243,15 +232,13 @@ namespace Gamekit3D
             controller.animator.SetTrigger(hashHit);
             controller.animator.SetTrigger(hashThrown);
 
-            //We unparent the hit source, as it would destroy it with the gameobject when it get replaced by the ragdol otherwise
-            deathAudio.transform.SetParent(null, true);
+                      deathAudio.transform.SetParent(null, true);
             deathAudio.PlayRandomClip();
             GameObject.Destroy(deathAudio, deathAudio.clip == null ? 0.0f : deathAudio.clip.length + 0.5f);
         }
 
         public void ApplyDamage(Damageable.DamageMessage msg)
         {
-            //TODO : make that more generic, (e.g. move it to the MeleeWeapon code with a boolean to enable shaking of camera on hit?)
             if (msg.damager.name == "Staff")
                 CameraShake.Shake(0.06f, 0.1f);
 
